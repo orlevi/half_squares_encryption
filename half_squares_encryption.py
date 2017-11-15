@@ -3,18 +3,18 @@ import random
 
 class half_squares:
     def __init__(self):
-        self.pixel_size = 0.5 #mm
+        self.pixel_size = 1 #mm
         self.triangle_0 = [(0,0),(1,1),(1,0)]
         self.triangle_1 = [(0,0),(1,1),(0,1)]
         self.triangle_2 = [(0,1),(1,0),(0,0)]
         self.triangle_3 = [(0,1),(1,0),(1,1)]
         self.triangles = [self.triangle_0, self.triangle_1, self.triangle_2, self.triangle_3]
 
-        self.image_0 = Image.open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\half_square_0_i.png")
-        self.image_1 = Image.open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\half_square_1_i.png")
-        self.image_2 = Image.open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\half_square_2_i.png")
-        self.image_3 = Image.open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\half_square_3_i.png")
-        self.input_image = Image.open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\name7.png")
+        self.image_0 = Image.open(r"half_square_0_i.png")
+        self.image_1 = Image.open(r"half_square_1_i.png")
+        self.image_2 = Image.open(r"half_square_2_i.png")
+        self.image_3 = Image.open(r"half_square_3_i.png")
+        self.input_image = Image.open(r"name7.png")
         self.input_image_conv = self.input_image.convert("1")
         self.input_image_data =  list(self.input_image_conv.getdata())
         self.row_num , self.column_num = self.input_image.size
@@ -24,9 +24,9 @@ class half_squares:
         self.comp_pattern_image = Image.new("1",(self.row_num * 5, self.column_num * 5))
         self.comp_flipped_image = Image.new("1",(self.row_num * 5, self.column_num * 5))
 
-        self.vectoric_rand = open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\vectoric_rand.svg",'w')
-        self.vectoric_comp = open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\vectoric_comp.svg",'w')
-        self.vectoric_comp_flipped = open(r"C:\Users\Or Levi\PycharmProjects\half_squares_encryption\vectoric_comp_flipped.svg",'w')
+        self.vectoric_rand = open(r"vectoric_rand.svg",'w')
+        self.vectoric_comp = open(r"vectoric_comp.svg",'w')
+        self.vectoric_comp_flipped = open(r"vectoric_comp_flipped.svg",'w')
         header = '<svg \n\twidth="{}mm"\n\theight="{}mm"\n\tviewBox="0 0 {} {}"\n\tversion="1.1" >\n'.format(self.row_num * self.pixel_size,
                                                                                                            self.column_num * self.pixel_size,
                                                                                                            self.row_num * self.pixel_size,
