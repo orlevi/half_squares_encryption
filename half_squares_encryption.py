@@ -3,7 +3,7 @@ import random
 
 class half_squares:
     def __init__(self):
-        self.pixel_size = 1 #mm
+        self.pixel_size = 0.5 #mm
         self.triangle_0 = [(0,0),(1,1),(1,0)] #upper right corner
         self.triangle_1 = [(0,0),(1,1),(0,1)] #lower left corner
         self.triangle_2 = [(0,1),(1,0),(0,0)] #upper left corner
@@ -13,7 +13,7 @@ class half_squares:
         self.aligner_margin = 0.5 #mm
         self.aligner_space  = 2 * (self.aligner_radius + self.aligner_margin) #mm
 
-        self.input_image = Image.open(r"name4.png")
+        self.input_image = Image.open(r"name6.png")
         self.input_image_conv = self.input_image.convert("1")
         self.input_image_data =  list(self.input_image_conv.getdata())
         self.row_num , self.column_num = self.input_image.size
@@ -59,13 +59,13 @@ class half_squares:
             return 2
 
     def get_svg_triangle(self,tri_num,row,col,flipped = 0):
-        x1 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][0][0]) + self.aligner_space)
+        x1 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][0][0])) + self.aligner_space
         y1 = self.pixel_size * (col + self.triangles[tri_num][0][1])
-        x2 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][1][0]) + self.aligner_space)
+        x2 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][1][0])) + self.aligner_space
         y2 = self.pixel_size * (col + self.triangles[tri_num][1][1])
-        x3 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][2][0]) + self.aligner_space)
+        x3 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][2][0])) + self.aligner_space
         y3 = self.pixel_size * (col + self.triangles[tri_num][2][1])
-        return '\t\t<polygon points="{},{}  {},{}  {},{}" />\n'.format(x1,y1,x2,y2,x3,y3)
+        return '\t\t<polygon points="{},{}  {},{}  {},{}" style="stroke:black;fill:none;stroke-width:0.1" />\n'.format(x1,y1,x2,y2,x3,y3)
 
     def add_svg_aligners(self):
         circle_1 = '\t\t<circle cx="{}" cy="{}" r="{}" stroke="red" stroke-width="0.1" fill="none" />\n'.format(
