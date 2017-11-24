@@ -4,10 +4,11 @@ import random
 class half_squares:
     def __init__(self):
         self.pixel_size = 0.5 #mm
-        self.triangle_0 = [(0,0),(1,1),(1,0)] #upper right corner
-        self.triangle_1 = [(0,0),(1,1),(0,1)] #lower left corner
-        self.triangle_2 = [(0,1),(1,0),(0,0)] #upper left corner
-        self.triangle_3 = [(0,1),(1,0),(1,1)] #lower right corner
+        self.size_factor = 0.85
+        self.triangle_0 = [(0,0),(self.size_factor,self.size_factor),(self.size_factor,0)]                #upper right corner
+        self.triangle_1 = [(1-self.size_factor,1-self.size_factor),(1,1),(1-self.size_factor,1)]          #lower left corner
+        self.triangle_2 = [(0,self.size_factor),(self.size_factor,0),(0,0)]                               #upper left corner
+        self.triangle_3 = [(1-self.size_factor,1),(1,1-self.size_factor),(1,1)] #lower right corner
         self.triangles = [self.triangle_0, self.triangle_1, self.triangle_2, self.triangle_3]
         self.aligner_radius = 1.5 #mm
         self.aligner_margin = 0.5 #mm
