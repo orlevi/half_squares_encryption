@@ -4,17 +4,17 @@ import random
 class half_squares:
     def __init__(self):
         self.pixel_size = 0.5 #mm
-        self.size_factor = 0.85
-        self.triangle_0 = [(0,0),(self.size_factor,self.size_factor),(self.size_factor,0)]                #upper right corner
-        self.triangle_1 = [(1-self.size_factor,1-self.size_factor),(1,1),(1-self.size_factor,1)]          #lower left corner
-        self.triangle_2 = [(0,self.size_factor),(self.size_factor,0),(0,0)]                               #upper left corner
-        self.triangle_3 = [(1-self.size_factor,1),(1,1-self.size_factor),(1,1)] #lower right corner
+        self.gap_factor = 0.1
+        self.triangle_0 = [(self.gap_factor,self.gap_factor), (1-self.gap_factor, 1-self.gap_factor), (1-self.gap_factor, self.gap_factor)]    #upper right corner
+        self.triangle_1 = [(self.gap_factor, self.gap_factor), (1-self.gap_factor, 1-self.gap_factor), (self.gap_factor, 1-self.gap_factor)]   #lower left corner
+        self.triangle_2 = [(self.gap_factor,1-self.gap_factor), (1-self.gap_factor, self.gap_factor), (self.gap_factor, self.gap_factor)]      #upper left corner
+        self.triangle_3 = [(self.gap_factor, 1-self.gap_factor), (1-self.gap_factor, self.gap_factor), (1-self.gap_factor, 1-self.gap_factor)] #lower right corner
         self.triangles = [self.triangle_0, self.triangle_1, self.triangle_2, self.triangle_3]
-        self.aligner_radius = 1.5 #mm
-        self.aligner_margin = 0.5 #mm
-        self.aligner_space  = 2 * (self.aligner_radius + self.aligner_margin) #mm
+        self.screw_radius = 1.5 #mm
+        self.screw_margin = 3   #mm
+        self.screw_space  = 2 * (self.screw_radius + self.screw_margin) #mm
 
-        self.input_image = Image.open(r"name6.png")
+        self.input_image = Image.open(r"lion.jpg")
         self.input_image_conv = self.input_image.convert("1")
         self.input_image_data =  list(self.input_image_conv.getdata())
         self.row_num , self.column_num = self.input_image.size
@@ -25,8 +25,8 @@ class half_squares:
         self.vectoric_comp = open(r"vectoric_comp.svg",'w')
         self.vectoric_comp_flipped = open(r"vectoric_comp_flipped.svg",'w')
 
-        self.width = self.row_num * self.pixel_size + 2 * self.aligner_space
-        self.height = self.column_num * self.pixel_size
+        self.width  = self.row_num * self.pixel_size + 2 * self.screw_space
+        self.height = self.column_num * self.pixel_size + 2 * self.screw_space
         header = '<svg \n\twidth="{}mm"\n\theight="{}mm"\n\tviewBox="0 0 {} {}"\n\tversion="1.1" >\n'.format(
             self.width,
             self.height,
@@ -60,44 +60,37 @@ class half_squares:
             return 2
 
     def get_svg_triangle(self,tri_num,row,col,flipped = 0):
-        x1 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][0][0])) + self.aligner_space
-        y1 = self.pixel_size * (col + self.triangles[tri_num][0][1])
-        x2 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][1][0])) + self.aligner_space
-        y2 = self.pixel_size * (col + self.triangles[tri_num][1][1])
-        x3 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][2][0])) + self.aligner_space
-        y3 = self.pixel_size * (col + self.triangles[tri_num][2][1])
+        x1 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][0][0])) + self.screw_space
+        y1 = self.pixel_size * (col + self.triangles[tri_num][0][1]) + self.screw_space
+        x2 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][1][0])) + self.screw_space
+        y2 = self.pixel_size * (col + self.triangles[tri_num][1][1]) + self.screw_space
+        x3 = self.pixel_size * (flipped * self.row_num + (1 - 2 * flipped) * (row + self.triangles[tri_num][2][0])) + self.screw_space
+        y3 = self.pixel_size * (col + self.triangles[tri_num][2][1]) + self.screw_space
         return '\t\t<polygon points="{},{}  {},{}  {},{}" style="stroke:black;fill:none;stroke-width:0.1" />\n'.format(x1,y1,x2,y2,x3,y3)
 
-    def add_svg_aligners(self):
+    def add_svg_addons(self):
         circle_1 = '\t\t<circle cx="{}" cy="{}" r="{}" stroke="red" stroke-width="0.1" fill="none" />\n'.format(
-            self.aligner_space / 2.0,
-            self.aligner_space / 2.0,
-            self.aligner_radius)
+            self.screw_space / 2.0,
+            self.screw_space / 2.0,
+            self.screw_radius)
         circle_2 = '\t\t<circle cx="{}" cy="{}" r="{}" stroke="red" stroke-width="0.1" fill="none" />\n'.format(
-            self.width - self.aligner_space / 2.0,
-            self.aligner_space / 2.0,
-            self.aligner_radius)
-        hor_1 = '\t\t<line x1="{}" y1="{}" x2="{}" y2="{}" style="stroke:red;stroke-width:0.1" />\n'.format(
-            self.aligner_margin,
-            self.aligner_space / 2.0,
-            2 * self.aligner_radius + self.aligner_margin,
-            self.aligner_space / 2.0)
-        hor_2 = '\t\t<line x1="{}" y1="{}" x2="{}" y2="{}" style="stroke:red;stroke-width:0.1" />\n'.format(
-            self.width - self.aligner_margin,
-            self.aligner_space / 2.0,
-            self.width - (2 * self.aligner_radius + self.aligner_margin),
-            self.aligner_space / 2.0)
-        ver_1 = '\t\t<line x1="{}" y1="{}" x2="{}" y2="{}" style="stroke:red;stroke-width:0.1" />\n'.format(
-            self.aligner_space / 2.0,
-            self.aligner_margin,
-            self.aligner_space / 2.0,
-            2 * self.aligner_radius + self.aligner_margin)
-        ver_2 = '\t\t<line x1="{}" y1="{}" x2="{}" y2="{}" style="stroke:red;stroke-width:0.1" />\n'.format(
-            self.width - self.aligner_space / 2.0,
-            self.aligner_margin,
-            self.width - self.aligner_space / 2.0,
-            2 * self.aligner_radius + self.aligner_margin)
-        return circle_1 + hor_1 + ver_1 + circle_2 + hor_2 + ver_2
+            self.width - self.screw_space / 2.0,
+            self.screw_space / 2.0,
+            self.screw_radius)
+        circle_3 = '\t\t<circle cx="{}" cy="{}" r="{}" stroke="red" stroke-width="0.1" fill="none" />\n'.format(
+            self.screw_space / 2.0,
+            self.height - self.screw_space / 2.0,
+            self.screw_radius)
+        circle_4 = '\t\t<circle cx="{}" cy="{}" r="{}" stroke="red" stroke-width="0.1" fill="none" />\n'.format(
+            self.width - self.screw_space / 2.0,
+            self.height - self.screw_space / 2.0,
+            self.screw_radius)
+        rectangle = '\t\t<polygon points="{},{}  {},{}  {},{}  {},{}" style="stroke:red;fill:none;stroke-width:0.1/>\n'.format(
+            0, 0,
+            self.width, 0,
+            self.width, self.height,
+            0, self.height)
+        return rectangle + circle_1 + circle_2 + circle_3 + circle_4
 
     def create_images(self):
         for row in range(self.row_num):
@@ -124,11 +117,12 @@ class half_squares:
                     self.vectoric_comp.write(self.get_svg_triangle(3, row, col))
                     self.vectoric_comp_flipped.write(self.get_svg_triangle(3, row, col, 1))
 
-        aligners = self.add_svg_aligners()
+        addons = self.add_svg_addons()
 
-        self.vectoric_rand.write(aligners + "</svg>")
-        self.vectoric_comp.write(aligners + "</svg>")
-        self.vectoric_comp_flipped.write(aligners + "</svg>")
+        self.vectoric_rand.write(addons + "</svg>")
+        self.vectoric_comp.write(addons + "</svg>")
+        self.vectoric_comp_flipped.write(addons + "</svg>")
+
         self.vectoric_rand.close()
         self.vectoric_comp.close()
         self.vectoric_comp_flipped.close()
