@@ -3,11 +3,11 @@ import random
 import re
 import os
 
-class half_squares:
-    def __init__(self):
-        self.pixel_size = 0.5 #mm
-        self.gap_factor = 0.05
-        self.inverted = True  #True looks better on cast, False looks better on extruded
+class half_squares(object):
+    def __init__(self, pic_name, rand_pattern=None, flip=False, pixel_size=0.5, gap_factor=0.05, inverted=True):
+        self.pixel_size = pixel_size #mm
+        self.gap_factor = gap_factor
+        self.inverted = inverted  #True looks better on cast, False looks better on extruded
         self.triangle_0 = [(self.gap_factor,self.gap_factor), (1-self.gap_factor, 1-self.gap_factor), (1-self.gap_factor, self.gap_factor)]    #upper right corner
         self.triangle_1 = [(self.gap_factor, self.gap_factor), (1-self.gap_factor, 1-self.gap_factor), (self.gap_factor, 1-self.gap_factor)]   #lower left corner
         self.triangle_2 = [(self.gap_factor,1-self.gap_factor), (1-self.gap_factor, self.gap_factor), (self.gap_factor, self.gap_factor)]      #upper left corner
@@ -17,7 +17,8 @@ class half_squares:
         self.screw_margin = 3   #mm
         self.screw_space  = 2 * (self.screw_radius + self.screw_margin) #mm
 
-        file_full_name = r"houses19.png"
+        file_full_name = pic_name
+        self.flip=flip
 
         name_finder = re.compile("(\w+)\.(\w+)")
         file_name_only = name_finder.match(file_full_name).group(1)
@@ -25,14 +26,14 @@ class half_squares:
         self.input_image_conv = self.input_image.convert("1")
         self.input_image_data =  list(self.input_image_conv.getdata())
         self.row_num , self.column_num = self.input_image.size
-        self.rand_pattern = [[True for i in range(self.column_num)] for j in range(self.row_num)]
+        self.rand_pattern = rand_pattern
         self.comp_pattern = [[True for i in range(self.column_num)] for j in range(self.row_num)]
 
         if not os.path.exists(os.path.dirname(r"result/" + file_name_only + r"/")):
             os.makedirs(os.path.dirname(r"result/" + file_name_only + r"/"))
         self.vectoric_rand = open(r"result/" + file_name_only + r"/" + file_name_only + r"_r.svg",'w')
         self.vectoric_preview = open(r"result/" + file_name_only + r"/" + file_name_only + r"_preview.svg", 'w')
-        self.vectoric_comp_flipped = open(r"result/" + file_name_only + r"/" + file_name_only + r"_c_flipped.svg",'w')
+        self.vectoric_comp = open(r"result/" + file_name_only + r"/" + file_name_only + r"_c_flipped.svg", 'w')
 
         self.width  = self.row_num * self.pixel_size + 2 * self.screw_space
         self.height = self.column_num * self.pixel_size + 2 * self.screw_space
@@ -46,12 +47,18 @@ class half_squares:
             self.height)
         self.vectoric_rand.write(header)
         self.vectoric_preview.write(header)
-        self.vectoric_comp_flipped.write(header)
+        self.vectoric_comp.write(header)
+
+        #generate the rand and complementary patterns
+        self.create_randomized_pattern()
+        self.create_complementary_pattern()
 
     def create_randomized_pattern(self):
-        for row in range(self.row_num):
-            for col in range(self.column_num):
-                self.rand_pattern[row][col] = random.choice([0,1,2,3])
+        if not self.rand_pattern:
+            self.rand_pattern = [[True for i in range(self.column_num)] for j in range(self.row_num)]
+            for row in range(self.row_num):
+                for col in range(self.column_num):
+                    self.rand_pattern[row][col] = random.choice([0,1,2,3])
 
     def create_complementary_pattern(self):
         for row in range(self.row_num):
@@ -66,7 +73,6 @@ class half_squares:
                         self.comp_pattern[row][col] = self.get_comp(self.rand_pattern[row][col])
                     else:
                         self.comp_pattern[row][col] = self.rand_pattern[row][col]
-
 
     def get_comp(self, pat):
         if pat == 0:
@@ -128,7 +134,7 @@ class half_squares:
 
         return rectangle + circle_1 + circle_2 + circle_3 + circle_4 + circle_5 + circle_6 + circle_7 + circle_8
 
-    def create_images(self):
+    def create_images(self, flip=1):
         for row in range(self.row_num):
             for col in range(self.column_num):
                 if self.rand_pattern[row][col] == 0:
@@ -144,32 +150,38 @@ class half_squares:
                     self.vectoric_rand.write(self.get_svg_triangle(3, row, col))
                     self.vectoric_preview.write(self.get_svg_triangle(3, row, col))
 
+                # flip is for thick materials (perspex etc), thin materials (paper etc) shouldn't be flipped
                 if self.comp_pattern[row][col] == 0:
                     self.vectoric_preview.write(self.get_svg_triangle(0, row, col))
-                    self.vectoric_comp_flipped.write(self.get_svg_triangle(0, row, col, 1))
+                    self.vectoric_comp.write(self.get_svg_triangle(0, row, col, self.flip))
                 elif self.comp_pattern[row][col] == 1:
                     self.vectoric_preview.write(self.get_svg_triangle(1, row, col))
-                    self.vectoric_comp_flipped.write(self.get_svg_triangle(1, row, col, 1))
+                    self.vectoric_comp.write(self.get_svg_triangle(1, row, col, self.flip))
                 elif self.comp_pattern[row][col] == 2:
                     self.vectoric_preview.write(self.get_svg_triangle(2, row, col))
-                    self.vectoric_comp_flipped.write(self.get_svg_triangle(2, row, col, 1))
+                    self.vectoric_comp.write(self.get_svg_triangle(2, row, col, self.flip))
                 elif self.comp_pattern[row][col] == 3:
                     self.vectoric_preview.write(self.get_svg_triangle(3, row, col))
-                    self.vectoric_comp_flipped.write(self.get_svg_triangle(3, row, col, 1))
+                    self.vectoric_comp.write(self.get_svg_triangle(3, row, col, self.flip))
 
         addons = self.add_svg_addons()
 
         self.vectoric_rand.write(addons + "</svg>")
         self.vectoric_preview.write(addons + "</svg>")
-        self.vectoric_comp_flipped.write(addons + "</svg>")
+        self.vectoric_comp.write(addons + "</svg>")
 
         self.vectoric_rand.close()
         self.vectoric_preview.close()
-        self.vectoric_comp_flipped.close()
+        self.vectoric_comp.close()
 
 
 if __name__ == '__main__':
-    b = half_squares()
-    b.create_randomized_pattern()
-    b.create_complementary_pattern()
-    b.create_images()
+    pixel_size=1#0.5
+    gap_factor=0.2#0.35
+    b1 = half_squares(pic_name="quote1_s.PNG", rand_pattern=None, flip=False, pixel_size=pixel_size, gap_factor=gap_factor)
+    b2 = half_squares(pic_name="quote2_s.PNG", rand_pattern=b1.comp_pattern, flip=False, pixel_size=pixel_size, gap_factor=gap_factor)
+    b3 = half_squares(pic_name="quote3_s.PNG", rand_pattern=b2.comp_pattern, flip=False, pixel_size=pixel_size, gap_factor=gap_factor)
+
+    b1.create_images()
+    b2.create_images()
+    b3.create_images()
